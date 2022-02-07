@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "name": "cordova-plugin-dotdigital-pushutils",
+    "cordova_name": "Dotdigital Push Utils",
+    "description": "Cordova plugin to provide some push related utilities",
+    "author": "Dotdigital",
+    "license": "MIT",
+    "cordova": {
+        "id": "cordova-plugin-dotdigital-pushutils",
+        "platforms": [
+            "ios"
+        ]
+    },
+    "keywords": [
+        "ecosystem:cordova",
+        "cordova",
+        "phonegap",
+        "cordova-ios",
+        "cordova-android",
+        "push",
+        "notifications",
+        "dotdigital"
+    ],
+    "engines": [
+        {
+            "name": "cordova",
+            "version": ">=3.0.0"
+        }
+    ],
+    "dependencies": {}
+}

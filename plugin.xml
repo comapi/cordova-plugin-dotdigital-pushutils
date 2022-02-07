@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin 
+xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-plugin-dotdigital-pushutils"
+    version="1.0.0">
+
+    <name>Dotdigital Push Utils</name>
+    <description>Cordova Dotdigital Push Utils</description>
+    <author>Dotdigital</author>
+    <license>Apache 2.0</license>
+    <keywords>cordova,dotdigital</keywords>
+
+    <!-- Plugin -->
+    <js-module src="www/dotdigitalPlugin.js" name="dotdigital">
+        <clobbers target="cordova.plugins.dotdigitalPlugin" />
+    </js-module>
+    
+    <!-- Android -->
+    <platform name="android">
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="dotdigital" >
+                <param name="android-package" value="com.dotdigital.plugin.DotdigitalPlugin"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+        </config-file>
+        
+        <source-file src="src/android/DotdigitalPlugin.java" target-dir="src/com/dotdigital/plugin/" />
+    </platform>
+
+  <platform name="ios">
+    
+    <config-file target="config.xml" parent="/widget">
+      <feature name="dotdigital">
+        <param name="ios-package" value="DotdigitalPlugin" />
+      </feature>
+    </config-file>
+
+    <header-file src="src/ios/DotdigitalPlugin.h" target-dir="DotdigitalPlugin"/>
+    <source-file src="src/ios/DotdigitalPlugin.m" target-dir="DotdigitalPlugin"/>
+
+  </platform>
+
+</plugin>
