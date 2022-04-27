@@ -1,11 +1,7 @@
 /**
  * DotdigitalPlugin constructor
  */
-function DotdigitalPlugin() {
-
-    // NOTE: ensure this remains in sync with the value in package.json
-    var pluginVersion = "1.0.0";
-
+ function DotdigitalPlugin() {
 
     function get(url) {
         return new Promise(function (resolve, reject) {
@@ -34,12 +30,10 @@ function DotdigitalPlugin() {
             }
 
             xhr.onerror = function () {
-                console.error(`openDeepLink failed (failed to call tracking URL)`, xhr.responseText);
                 reject(xhr.status);
             }
 
             xhr.onabort = function (evt) {
-                console.error(evt);
                 reject(xhr);
             }
 
@@ -79,46 +73,74 @@ function DotdigitalPlugin() {
 
     /**
      * Method to allow integrator to open a deep link
-     * pass the entire payload so we can access the url (and trackingUrl if present)
+     * pass the link
      * @param {Callback} successCallback - callback to call if method was successful
      * @param {Callback} errorCallback - callback to call if method failed with the error message
-     * @param {String} payload - 
+     * @param {String} link - the deep link (or url) to open
      */
-    DotdigitalPlugin.prototype.openDeepLink = function (successCallback, errorCallback, payload) {
+    DotdigitalPlugin.prototype.openLink = function (successCallback, errorCallback, link) {
+        cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [link]);
+    }
 
-        if (payload.trackingUrl) {
-            get(payload.trackingUrl)
-                .then((result) => {
-                    cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.url]);
-                })
-                .catch((error) => {
-                    cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.url]);
-                });
+    /**
+     * Method to allow integrator to handle a deep link - this can be safely called for all incoming push notifications.
+     * The code weil determine whether there is a deep link to be opened and automatically handle it.
+     * @param {Callback} successCallback - callback to call if method was successful
+     * @param {Callback} errorCallback - callback to call if method failed with the error message
+     * @param {Object} payload - the push payload
+     */
+
+    DotdigitalPlugin.prototype._handleLink = function (successCallback, errorCallback, payload) {
+
+        if (this.containsDeepLink(payload)) {
+
+            if (payload.additionalData.dd_deepLink.trackingUrl) {
+                get(payload.additionalData.dd_deepLink.trackingUrl)
+                    .then((result) => {
+                        console.log(`GET ${payload.additionalData.dd_deepLink.trackingUrl} succeeded`, result);
+                    })
+                    .catch((error) => {
+                        console.error(`Failed to GET ${payload.additionalData.dd_deepLink.trackingUrl}`, error);
+                    })
+                    .finally(() => {
+                        cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.additionalData.dd_deepLink.url]);
+                    })
+
+            }else{
+                cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.additionalData.dd_deepLink.url]);
+            }
+
         } else {
-            cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.url]);
+            successCallback();
         }
     }
 
-    // open if there is one, do nothing otherwise - they can always call this safely
-    // lose the above one
-    DotdigitalPlugin.prototype.handleLink = function (successCallback, errorCallback, payload) {
+    /**
+     * Promisified version of _handleLink
+     * 
+     * @param {*} payload 
+     * @returns Promise
+     */
+    DotdigitalPlugin.prototype.handleLink = function (payload) {
+        
+        return new Promise((resolve, reject) => {
 
-        if(payload.dd_deepLink && payload.dd_deepLink.url){
-            
-            if(payload.dd_deepLink.trackingUrl){
-                get(payload.dd_deepLink.trackingUrl)
-                    .then((result) => {
-                        cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.url]);
-                    })
-                    .catch((error) => {
-                        console.log(`Failed to GET ${payload.dd_deepLink.trackingUrl}`);
-                        cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.url]);
-                    });
-            }
+            self._handleLink((result) => {
+                resolve(result);
+            },
+                (error) => {
+                    reject(error);
+                }, payload);
+        });
+    }
 
-        }else{
-            successCallback();
-        }
+    /**
+     * Check whether a push payload contains a deep link 
+     * @param { Object } payload 
+     * @returns 
+     */
+    DotdigitalPlugin.prototype.containsDeepLink = function (payload) {
+        return payload && payload.additionalData && payload.additionalData.dd_deepLink && payload.additionalData.dd_deepLink.url;
     }
 
 }
