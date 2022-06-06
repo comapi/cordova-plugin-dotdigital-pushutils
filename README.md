@@ -14,8 +14,9 @@ Read through the sections below to discover how to deploy and use the Dotdigital
 # Deep links
 You can send a deep link as part of a push message. 
 You will need to use another plugin to correctly handle the links in your application (for routing purposes). 
-The following two 3rd party plugins are recommended (*The ionic sample app uses ionic-plugin-deeplinks*)
+The following 3rd party plugins are recommended
 
+  * [cordova-plugin-customurlscheme](https://github.com/EddyVerbruggen/Custom-URL-scheme)
   * [cordova-universal-links-plugin](https://github.com/nordnet/cordova-universal-links-plugin)
   * [ionic-plugin-deeplinks](https://github.com/driftyco/ionic-plugin-deeplinks)
 

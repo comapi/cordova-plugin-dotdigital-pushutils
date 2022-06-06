@@ -43,6 +43,14 @@
 
     var self = this;
 
+
+    /**
+     * Method to query plugin version
+     */
+     DotdigitalPlugin.prototype.version = function () {
+        return "1.0.0"
+    }
+
     /**
      * Method to allow integrator to explicitly set the application badge count
      * @param {Callback} successCallback - callback to call if method was successful
@@ -54,7 +62,7 @@
     }
 
     /**
-     * Method to allow integrator to explicitly set the application badge count
+     * Method to allow integrator to explicitly get the application badge count
      * @param {Callback} successCallback - callback to call if method was successful
      * @param {Callback} errorCallback - callback to call if method failed with the error message
      */
@@ -135,11 +143,12 @@
     }
 
     /**
-     * Check whether a push payload contains a deep link 
+     * Check whether a push payload contains a link (either a deep link or a url) 
      * @param { Object } payload 
-     * @returns 
+     * @returns Boolean
      */
-    DotdigitalPlugin.prototype.containsDeepLink = function (payload) {
+    // TODO: should we handle the case where we have the trackingUrl but not the url (we want to track a push)
+    DotdigitalPlugin.prototype.containsLink = function (payload) {
         return payload && payload.additionalData && payload.additionalData.dd_deepLink && payload.additionalData.dd_deepLink.url;
     }
 
