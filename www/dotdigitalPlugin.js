@@ -100,7 +100,7 @@
 
     DotdigitalPlugin.prototype._handleLink = function (successCallback, errorCallback, payload) {
 
-        if (this.containsDeepLink(payload)) {
+        if (this.containsLink(payload)) {
 
             if (payload.additionalData.dd_deepLink.trackingUrl) {
                 get(payload.additionalData.dd_deepLink.trackingUrl)

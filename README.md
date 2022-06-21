@@ -50,3 +50,253 @@ You will need to modify AndroidManifest.xml
 </intent-filter>
 ```
 
+A simple way of testing these links is to implement the follwoing function in your app:
+THis is always called by cordova when the app is launched through a custom scheme url.
+
+```html
+<script>
+    function handleOpenURL(url) {
+        setTimeout(function() {
+        alert("received url: " + url);
+        console.log(`handleOpenUrl(${url})`);
+        }, 0);
+    }
+</script>
+```
+
+The above 3rd party plugins will have a more sophisticated approach and implementing this method may interfere with their bahaviour.
+
+
+# Methods
+
+
+## version()
+
+```javascript
+const version = cordova.plugins.dotdigitalPlugin.version();
+```
+Returns the version of the plugin.
+
+## setBadgeCount()
+```javascript
+window.cordova.plugins.dotdigitalPlugin.setBadgeCount(() => {
+      console.log("setBadgeCount succeeded ;-)");
+  }, () => {
+      console.error("setBadgeCount failed ;-(");
+  }, 0);
+```
+iOS specific method to explicitly set the Application Badge Count 
+
+## getBadgeCount()
+```javascript
+window.cordova.plugins.dotdigitalPlugin.getBadgeCount((count) => {
+      console.log(`getBadgeCount succeeded: ${count}`);
+  }, () => {
+      console.error("getBadgeCount failed ;-(");
+  });
+```
+iOS specific method to query the Application Badge Count 
+
+## getPlatform()
+```javascript
+cordova.plugins.dotdigitalPlugin.getPlatform((platform) => {
+      console.log(`getPlatform succeeded: ${platform}`);
+  }, () => {
+      console.error("getBadgeCount failed ;-(");
+  });
+```
+Method to query the application platform - (returns "android" or "iOS")
+
+## openLink()
+```javascript
+cordova.plugins.dotdigitalPlugin.openLink(() => {
+      console.log("openLink succeeded ;-)");
+  }, () => {
+      console.error("openLink failed ;-(");
+  }, "myapp://products/1");
+```
+
+Method to directly open a link. 
+
+## handleLink()
+
+```javascript
+
+cordova.plugins.dotdigitalPlugin.handleLink(payload)
+    .then(() => {
+        console.log("👍");
+    })
+    .catch((error) => {
+        console.log("😌", error);
+    })
+
+
+```
+Method to perform all the handling associated with a deep link. 
+This can be safely called for all notifications received and will do nothing if no link is present. 
+If there is a link present, this method will perform a GET request to a tracking analytics endpoint (if specified)
+and then open the link. It is up to the Integrator to handle the link (see above).
+
+## containsLink()
+```javascript
+const containsLink = cordova.plugins.dotdigitalPlugin.containsLink(payload);
+```
+Method to ascertain whether a notification contains a link. No action is performed other than inspecting the payload.
+
+
+
+# Integration strategy
+
+Here is a minimal sample app that uses `phonegap-plugin-push` to manage push notifications.
+
+```javascript
+
+const config = {
+  urlBase: "https://api.comapi.com",
+  apispaceId: ">>>YOUR APISPACE <<<",
+  secret: ">>>YOUR SECRET<<<",
+  profileId: ">>>PROFILEID OF DEVICE OWNER<<<",
+  email: ">>>EMAIL OF DEVICE OWNER<<<",
+  iss: "https://api.comapi.com/defaultauth",
+  aud: "https://api.comapi.com",
+};
+
+function createJwt(profileId, nonce) {
+
+    // Header
+    var oHeader = { alg: 'HS256', typ: 'JWT' };
+    // Payload
+    var tNow = KJUR.jws.IntDate.get('now');
+    var tEnd = KJUR.jws.IntDate.get('now + 1day');
+    var oPayload = {
+        sub: profileId,
+        nonce: nonce,
+        iss: config.iss,
+        aud: config.aud,
+        iat: tNow,
+        exp: tEnd,
+    };
+    var sHeader = JSON.stringify(oHeader);
+    var sPayload = JSON.stringify(oPayload);
+    var sJWT = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, { utf8: config.secret });
+
+    return sJWT;
+}
+
+function challengeHandler(options, answerAuthenticationChallenge) {
+    var jwt = createJwt(config.profileId, options.nonce);
+    answerAuthenticationChallenge(jwt);
+}
+
+// This should only be called once
+function initialiseComapi(data) {
+
+    let pushConfig = {};
+    // NOTE: you cannot set both apns and fcm 
+    // - identify the platform and set the appropriate device specific config
+    // this device object is from cordova-plugin-device
+    if (device.platform === 'iOS') {
+        pushConfig.apns = {
+            "bundleId": "your bundleId",
+            // Ensure you set te correct environment - 0 for Sandbox, 1 for production (ur use enum if using TS)
+            "environment": 0,
+            "token": data.registrationId
+        };
+    } else if (device.platform === 'Android') {
+        pushConfig.fcm = {
+            "package": "your packagename",
+            "registrationId": data.registrationId
+        };
+    }
+
+    var comapiConfig = new COMAPI.ComapiConfig()
+        .withApiSpace(config.apispaceId)
+        .withUrlBase(config.urlBase)
+        .withAuthChallenge(challengeHandler)
+        .withLogLevel(3)
+        .withPushConfiguration(pushConfig)
+
+    let _comapiSDK;
+
+    COMAPI.Foundation.initialise(comapiConfig)
+        .then(function (result) {
+            _comapiSDK = result;
+            console.log("Initialised, starting session ...")
+            return _comapiSDK.startSession();
+        })
+        .then(function (result) {
+            console.log("Getting Profile ...")
+            return _comapiSDK.services.profile.getMyProfile();
+        })
+        .then(function (profile) {
+            // EC will create a contact off the back of a webhook subscription for this ...
+            profile.email = config.email;
+            console.log("Updating profile");
+            return _comapiSDK.services.profile.updateMyProfile(profile);
+        })
+        .then(function (result) {
+            console.log("Done");
+            return _comapiSDK;
+        });
+}
+
+function onDeviceReady() {
+
+    const push = PushNotification.init({
+        ios: {
+            alert: "true",
+            badge: "true",
+            sound: "true"
+        },
+        android: {
+        },
+    });
+
+    let hasRegistered = false;
+    push.on('registration', (data) => {
+
+        console.log(`push.on("registration") : ${data.registrationId}`);
+
+        // plugin can fire this twice so ignore subsequent calls
+        if (!hasRegistered) {
+            hasRegistered = true;
+            initialiseComapi(data);
+        }
+    });
+
+    push.on('notification', (data) => {
+
+      let msg = JSON.stringify(data);
+      console.log(msg);
+
+      if (cordova && cordova.plugins && cordova.plugins.dotdigitalPlugin) {
+
+        /* You dont need to call containsDeepLink() as handleLink() will simply do nothing if thre is no link to process
+         */
+
+        if(cordova.plugins.dotdigitalPlugin.containsLink(data)){
+
+            cordova.plugins.dotdigitalPlugin.handleLink(data)
+                .then(() => {
+                    console.log("👍");
+                })
+                .catch((error) => {
+                    console.log("😌", error);
+                })
+            }
+        }
+
+        let msg = JSON.stringify(data);
+        alert(msg);
+
+    });
+
+    push.on('error', (e) => {
+        console.log(e.message);
+    });
+
+
+}
+
+
+```
