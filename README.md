@@ -2,7 +2,7 @@
 The Cordova plugin is designed to work in conjunction with the existing Javascript SDK. It allows your Cordova or PhoneGap app to open deep links. 
 
 Read through the sections below to discover how to deploy and use the Dotdigital Cordova Plugin to Dotdigital enable your apps:
->**Compatability**
+>**Compatibility**
 >
 > This plugin supports iOS (7 and above) and Android (4.0 - API level 14 and above). It works with Cordova and PhoneGap frameworks.
 
@@ -50,8 +50,8 @@ You will need to modify AndroidManifest.xml
 </intent-filter>
 ```
 
-A simple way of testing these links is to implement the follwoing function in your app:
-THis is always called by cordova when the app is launched through a custom scheme url.
+A simple way of testing these links is to implement the following function in your app:
+This is always called by cordova when the app is launched through a custom scheme url.
 
 ```html
 <script>
@@ -64,7 +64,7 @@ THis is always called by cordova when the app is launched through a custom schem
 </script>
 ```
 
-The above 3rd party plugins will have a more sophisticated approach and implementing this method may interfere with their bahaviour.
+The above 3rd party plugins will have a more sophisticated approach and implementing this method may interfere with their behavior.
 
 
 # Methods
@@ -116,7 +116,7 @@ cordova.plugins.dotdigitalPlugin.openLink(() => {
   }, "myapp://products/1");
 ```
 
-Method to directly open a link. 
+Method to directly open a link. The url is passed rather than the push payload. THis method is only supplied for advanced use cases.
 
 ## handleLink()
 
@@ -221,7 +221,7 @@ function initialiseComapi(data) {
     COMAPI.Foundation.initialise(comapiConfig)
         .then(function (result) {
             _comapiSDK = result;
-            console.log("Initialised, starting session ...")
+            console.log("Initialized, starting session ...")
             return _comapiSDK.startSession();
         })
         .then(function (result) {
@@ -271,7 +271,7 @@ function onDeviceReady() {
 
       if (cordova && cordova.plugins && cordova.plugins.dotdigitalPlugin) {
 
-        /* You dont need to call containsDeepLink() as handleLink() will simply do nothing if thre is no link to process
+        /* You don't need to call containsDeepLink() as handleLink() will simply do nothing if there is no link to process
          */
 
         if(cordova.plugins.dotdigitalPlugin.containsLink(data)){
