@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "cordova-plugin-dotdigital-pushutils",
     "cordova_name": "Dotdigital Push Utils",
     "description": "Cordova plugin to provide some push related utilities",

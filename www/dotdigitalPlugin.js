@@ -48,7 +48,7 @@
      * Method to query plugin version
      */
      DotdigitalPlugin.prototype.version = function () {
-        return "1.0.0"
+        return "1.1.0"
     }
 
     /**
@@ -110,7 +110,7 @@
                     .catch((error) => {
                         console.error(`Failed to GET ${payload.additionalData.dd_deepLink.trackingUrl}`, error);
                     })
-                    .finally(() => {
+                    .then(() => {
                         cordova.exec(successCallback, errorCallback, "dotdigital", "openDeepLink", [payload.additionalData.dd_deepLink.url]);
                     })
 
