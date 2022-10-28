@@ -1,31 +1,45 @@
 {
-    "version": "1.1.0",
-    "name": "cordova-plugin-dotdigital-pushutils",
-    "cordova_name": "Dotdigital Push Utils",
-    "description": "Cordova plugin to provide some push related utilities",
-    "author": "Dotdigital",
-    "license": "MIT",
-    "cordova": {
-        "id": "cordova-plugin-dotdigital-pushutils",
-        "platforms": [
-            "ios"
-        ]
-    },
-    "keywords": [
-        "ecosystem:cordova",
-        "cordova",
-        "phonegap",
-        "cordova-ios",
-        "cordova-android",
-        "push",
-        "notifications",
-        "dotdigital"
-    ],
-    "engines": [
-        {
-            "name": "cordova",
-            "version": ">=3.0.0"
-        }
-    ],
-    "dependencies": {}
+  "version": "1.1.0",
+  "name": "@comapi/cordova-plugin-dotdigital-pushutils",
+  "cordova_name": "Dotdigital Push Utils",
+  "description": "Cordova plugin to provide some push related utilities",
+  "author": "Dotdigital",
+  "license": "MIT",
+  "cordova": {
+    "id": "cordova-plugin-dotdigital-pushutils",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova",
+    "phonegap",
+    "cordova-ios",
+    "cordova-android",
+    "push",
+    "notifications",
+    "dotdigital"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "dependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/comapi/cordova-plugin-dotdigital-pushutils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/comapi/cordova-plugin-dotdigital-pushutils/issues"
+  },
+  "homepage": "https://github.com/comapi/cordova-plugin-dotdigital-pushutils#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
